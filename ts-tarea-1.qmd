@@ -1,0 +1,105 @@
+---
+title: "Tarea 01"
+subtitle: "Modelos de Supervivencia y Series de Tiempo"
+format: 
+  pdf: 
+    include-in-header: 
+      text: |
+        \usepackage{amsmath}
+        \usepackage{float}
+    colorlinks: true
+    geometry:
+      - top=20mm
+      - left=20mm
+      - right=20mm
+      - heightrounded
+    fig-pos: "H"
+author:
+  - name: "Aaron Mauricio Gómez"
+  - name: "Carlos Brito Mejía"
+  - name: "Diego Luna"
+  - name: "Francisca Vilca Sánchez"
+crossref:
+  fig-title: Figura
+  fig-prefix: Figura
+  tbl-title: Tabla
+  tbl-prefix: Tabla
+tbl-cap-location: bottom
+---
+
+```{r setup, include=FALSE}
+
+library(quantmod)
+library(aTSA)
+library(multimode)
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(here)
+library(forecast)
+library(aTSA)
+library(seasonal)
+
+```
+
+  Usted invierte dinero en la compra de una acción. Para saber qué tan viable es su inversión, ha decidido hacer un análisis de serie de tiempo. Este tipo de análisis se utiliza para examinar los datos históricos y predecir futuros cambios en el valor de una inversión. Antes de invertir, es importante informarse y evaluar su disposición al riesgo y objetivos, así como hacer su perfil de inversionista. También es fundamental conocer los fundamentos de las inversiones y la rentabilidad esperada. Además, existen diversas metodologías que pueden ayudar a desarrollar estrategias efectivas para la inversión.
+
+  Para su tarea busquen en Yahoo finanzas una acción que les llame su atención para su análisis. Yahoo finanzas es una de las principales páginas en la que usted podrá consultar información financiera, en ella además le permitirá ver gráficamente los datos y lo más importante descargar los datos en formato csv. Descargue los datos históricos del **1 de enero de 2001** al **30 Junio de 2020**, y en frecuencia indique periodicidad mensual, guarde estos datos en su carpeta de trabajo e impórtelos en R.
+
+Con base a dichos valores realice:
+
+1. Descargue e importe los datos en R y con ellos convierta el vector de precios a un objeto de series de tiempo y vea el comportamiento de sus datos, es decir calcule la media, moda, cuartiles, máximos, mínimos y varianza. Haga una gráfica de caja para ver visualmente estos resultados.
+
+```{r include=FALSE}
+
+# cargar datos
+
+
+```
+
+
+```{r}
+#
+#media <-
+#moda <-
+#cuartiles <- 
+#max <-
+#min <- 
+#varianza <- 
+#
+
+```
+
+
+2. Haga un análisis de sus datos, determinar si hay tendencias crecientes, decrecientes y periodicidad.
+
+3. Realice una gráfica de a serie de tiempo usando las metodologías vistas en clases (ggplot2,plot y xts)
+
+4. Realiza las siguientes suavizaciones:
+- Suavización de promedios móviles simple (PS) de orden 2 y 10.
+- Suavización de promedios móviles ponderados (PPM) de orden 4 con los pesos ($0.5, 0.2, 0.2, 0.1$) para ($x_t, x_{t−1}, x_{t−2}, x_{t−3}$) y otra modelo (PPM) de orden 12 seleccionando ustedes mismos los pesos y mencionado el porque de esos pesos.
+- Suavización de promedios móviles simple (PS) de orden 2 y 10.
+- Suavización exponencial simple con $\alpha = 0.01, \alpha = 0.5, \alpha = 0.99$, ¿Cuál es el papel de $\alpha$ en la estimación de valores pronostico?
+- Suavización Holt, con $\alpha = 0.5 y \beta = 0.2, \beta = 0.8$ ¿Cuál es el papel de $\beta$ en la estimación de valores pronostico?
+- Suavización Holt-Winters, con $\alpha = 0.5 y \beta = 0.2, \gamma = 0.8$ y otro modelo Holt-Winterscon una selección automática de R.
+
+5. Cada inciso del punto anterior tiene dos o tres modelo del mismo tipo, así que una misma gráfica muestra los resultados junto con la serie original por modelo.
+
+6. Seleccione el mejor modelo y mencione el por qué de su elección.
+
+7. Utilizar la autocorrelación para determinar si hay patrones en los residuos de una serie de tiempo.
+
+8. Desea proyectar la información un año, ¿Cuál sería el mejor modelo para la proyección? realice la proyección y concluya si la proyección tiene sentido o no, detallando sus observaciones
+
+9. Demuestra que si una serie de tiempo es estacionaria en media y varianza, entonces su autocorrelación es
+
+$$ \rho(h) = Corr(x_t, x_{t+h}) = \dfrac{E[x_t, x_{t+h}] − \mu}{\sigma^2}$$
+10. Demuestra mediante inducción que en el suavizado exponencial esta expresión es válida
+
+$$ \hat{x}_{t+1} = ax_t + (1 − α)\hat{x}_t $$
+
+
+$$ \bar{X}_{t+1} = \alpha X_t + (1 - \alpha) \bar{X}_{t} $$
+
+
+
