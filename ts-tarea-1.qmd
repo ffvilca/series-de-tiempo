@@ -50,46 +50,163 @@ Con base a dichos valores realice:
 
 1. Descargue e importe los datos en R y con ellos convierta el vector de precios a un objeto de series de tiempo y vea el comportamiento de sus datos, es decir calcule la media, moda, cuartiles, máximos, mínimos y varianza. Haga una gráfica de caja para ver visualmente estos resultados.
 
-```{r include=FALSE}
+Nuestro interés está en ver la posibilidad de invertir en las acciones de [*CEMEX*](https://www.cemexmexico.com/) una empresa ligada al ámbito de la construcción que se autodenomina ser líder en la venta y producción de Cemento y otros materiales. Para saber si es una buena opción hacer está inversión revisaremos los datos históricos desde el 1 de enero de 2001 al 30 de junio de 2020, usando algunos comandos y librerías de R extraeremos los datos desde [Yahoo! Finanzas](https://es-us.finanzas.yahoo.com/), tal como se muestra en el siguiente código:
 
-# cargar datos
+```{r results='hide'}
 
+getSymbols("CX", src = "yahoo", from = "2001-01-01", to = "2020-06-30",
+           periodicity= "monthly")
+base <- CX[,6] # para solo usar la columna de los precios de cierre ajustados
+ts_base <- ts(base, start=2001, frequency = 12) # creamos el objeto de series de tiempo
+```
+
+Una vez que tenemos la base y el objeto series de tiempo comenzamos a hacer un análisis del comportamiento de los datos obteniendo algunos datos interesantes, que se pueden ver resumidos en la Tabla 1:
+
+```{r warning=FALSE,fig.align="center", fig.cap= "Tabla 1: Resumen del comportamiento de los datos", echo=FALSE, message=FALSE}
+
+media <- mean(ts_base)
+moda <- locmodes(ts_base, mod0 = 1)
+cuartiles <- quantile(ts_base,probs = c(0.25,0.5,0.75)) 
+maximo <- max(ts_base)
+minimo <- min(ts_base) 
+varianza <- var(ts_base)
+
+tabla_datos1 <- rbind(media, moda$locations,minimo,cuartiles[1],cuartiles[2],cuartiles[3],maximo,varianza)
+
+row.names(tabla_datos1) <- c("Media","Moda*","Mínimo","Cuartil 0.25","Mediana", "Cuartil 0.75","Máximo", "Varianza")
+
+colnames(tabla_datos1) <- c("Valores de la acción")
+
+a <- knitr::kable(tabla_datos1, digits = 3, align = "c") %>% 
+  kable_styling(full_width=F,position="center",latex_options = "HOLD_position")
+
+footnote(a,general="* = Es el valor de la locación estimada de la moda")
 
 ```
 
+De esto se puede notar que AÑADIR ANÁLISIS
 
-```{r}
-#
-#media <-
-#moda <-
-#cuartiles <- 
-#max <-
-#min <- 
-#varianza <- 
-#
+Además a través de un gráfico de caja se puede ver el resumen de estas medidas, tal como se muestra en la Figura 1:
 
+```{r out.width="60%", fig.align="center", fig.cap= "Boxplot de la acción de CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
+
+grafico_1 <- ggplot(base, aes( x = CX.Adjusted, y = "")) +
+  geom_boxplot(fill = "#390099", color = "black",outlier.colour= "#FFBD00" ,outlier.size=2) +
+  labs(x="Valor de la acción",y= "",caption = "Para el périodo del 01-01-2001 al 30-06-2020")+
+  ggtitle("Dispersón de la acción de CEMEX")+
+  coord_flip()+
+  theme_bw()
+  
+grafico_1
 ```
 
 
 2. Haga un análisis de sus datos, determinar si hay tendencias crecientes, decrecientes y periodicidad.
 
+ESCRIBIR ARGUMENTOS
+
+```{r echo = FALSE}
+ts <- c(ts_base, rep(0,6))
+
+ts_matrix <- matrix(ts, ncol = 12, byrow = T)
+
+colnames(ts_matrix) <- c("Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                         "Julio","Agosto","Septiembre","Octubre",
+                         "Noviembre","Diciembre")
+
+summary(ts_matrix)
+```
+
+
 3. Realice una gráfica de a serie de tiempo usando las metodologías vistas en clases (ggplot2,plot y xts)
+
+```{r out.width="60%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
+
+CX_base = data.frame(ts_base,time = seq(ISOdate(2001,01,01), 
+                                     ISOdate(2020,06,30),
+                                     by = "month"))
+
+ggplot(CX_base, aes(x = time, y = CX.Adjusted))+ #Se inicializa la gráfica
+  geom_line(color = "#390099") + #Se declara una gráfica de línea
+  labs(x = 'Tiempo', y = 'Precio de la acción', 
+       title = 'Serie de tiempo de la acción de CEMEX')
+
+
+```
+
 
 4. Realiza las siguientes suavizaciones:
 - Suavización de promedios móviles simple (PS) de orden 2 y 10.
+
+```{r}
+p.mov.2 = ma(ts_base, order = 2)
+p.mov.10 = ma(ts_base, order = 10)
+```
+
 - Suavización de promedios móviles ponderados (PPM) de orden 4 con los pesos ($0.5, 0.2, 0.2, 0.1$) para ($x_t, x_{t−1}, x_{t−2}, x_{t−3}$) y otra modelo (PPM) de orden 12 seleccionando ustedes mismos los pesos y mencionado el porque de esos pesos.
-- Suavización de promedios móviles simple (PS) de orden 2 y 10.
+
+```{r}
+pesos.b1 <- c(0.5,0.2,0.2,0.1)
+p.mov.pond.4 <- stats::filter(ts_base, pesos.b1, sides=1)
+
+ts <- c(ts_base, rep(0,6))
+ts_matrix <- matrix(ts, ncol = 12, byrow = T)
+suma <- sum(colMeans(ts_matrix))
+pesos.b2 <- round(colMeans(ts_matrix)/suma,4)
+
+p.mov.pond.12 <- stats::filter(ts_base, pesos.b2, sides=1)
+```
+
+
+- Suavización de promedios móviles simples centrados (PSC) de orden 2 y 10.
+
+```{r}
+p.mov.2.c = ma(ts_base, order = 2, centre = TRUE)
+p.mov.10.c = ma(ts_base, order = 10, centre = TRUE)
+```
+
 - Suavización exponencial simple con $\alpha = 0.01, \alpha = 0.5, \alpha = 0.99$, ¿Cuál es el papel de $\alpha$ en la estimación de valores pronostico?
+
+```{r}
+ts.base.sua_001 = ses(ts_base, alpha=0.01, initial = 'simple')
+ts.base.sua_05 = ses(ts_base, alpha=0.5, initial = 'simple')
+ts.base.sua_099 = ses(ts_base, alpha=0.99, initial = 'simple')
+```
+
+ESCRIBIR RESPUESTA
+
 - Suavización Holt, con $\alpha = 0.5 y \beta = 0.2, \beta = 0.8$ ¿Cuál es el papel de $\beta$ en la estimación de valores pronostico?
+
+```{r}
+ts.holt_0502 = Holt(ts_base, alpha = 0.5, beta=0.2)
+ts.holt_0508 = Holt(ts_base, alpha = 0.5, beta=0.8)
+```
+
+ESCRIBIR RESPUESTA
+
 - Suavización Holt-Winters, con $\alpha = 0.5 y \beta = 0.2, \gamma = 0.8$ y otro modelo Holt-Winterscon una selección automática de R.
+
+```{r}
+hw.ts.1 = hw(ts_base, h=12,optim.start = c(0.5,0.2,0.8))     # :c
+hw.ts.2 = hw(ts_base, h=12, seasonal='additive')
+```
+
 
 5. Cada inciso del punto anterior tiene dos o tres modelo del mismo tipo, así que una misma gráfica muestra los resultados junto con la serie original por modelo.
 
+HACER GRÁFICOS
+
 6. Seleccione el mejor modelo y mencione el por qué de su elección.
+
+RESPONDER MODELO
 
 7. Utilizar la autocorrelación para determinar si hay patrones en los residuos de una serie de tiempo.
 
+HACER GRÁFICO ACF
+
 8. Desea proyectar la información un año, ¿Cuál sería el mejor modelo para la proyección? realice la proyección y concluya si la proyección tiene sentido o no, detallando sus observaciones
+
+VER LOS DATOS Y ELEGIR
 
 9. Demuestra que si una serie de tiempo es estacionaria en media y varianza, entonces su autocorrelación es
 
