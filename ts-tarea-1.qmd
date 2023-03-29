@@ -88,7 +88,7 @@ De esto se puede notar que AÑADIR ANÁLISIS
 
 Además a través de un gráfico de caja se puede ver el resumen de estas medidas, tal como se muestra en la Figura 1:
 
-```{r out.width="60%", fig.align="center", fig.cap= "Boxplot de la acción de CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
+```{r out.width="80%", fig.align="center", fig.cap= "Boxplot de la acción de CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
 
 grafico_1 <- ggplot(base, aes( x = CX.Adjusted, y = "")) +
   geom_boxplot(fill = "#390099", color = "black",outlier.colour= "#FFBD00" ,outlier.size=2) +
@@ -103,24 +103,56 @@ grafico_1
 
 2. Haga un análisis de sus datos, determinar si hay tendencias crecientes, decrecientes y periodicidad.
 
-ESCRIBIR ARGUMENTOS
 
-```{r echo = FALSE}
+```{r out.width="80%", fig.align="center", fig.cap= "Gráfico Financiero para la acción CX", echo=FALSE, message=FALSE , warning=FALSE}
+
 ts <- c(ts_base, rep(0,6))
 
 ts_matrix <- matrix(ts, ncol = 12, byrow = T)
 
-colnames(ts_matrix) <- c("Enero","Febrero","Marzo","Abril","Mayo","Junio",
+meses <- c("Enero","Febrero","Marzo","Abril","Mayo","Junio",
                          "Julio","Agosto","Septiembre","Octubre",
                          "Noviembre","Diciembre")
+chartSeries(CX,
+            theme = chartTheme("white"),
+            bar.type = "hlc",     
+            up.col = "#FFBD00",
+            dn.col = "#ff0054")
+```
 
-summary(ts_matrix)
+
+```{r out.width="80%", fig.align="center", fig.cap= "Boxplot para cada mes para la acción CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
+
+boxplot(ts_base ~ cycle(ts_base),
+       col = "#390099", # Color de relleno
+       border = "#ff0054", #Color de contorno
+       main='Variación de la acción de CEMEX por mes',
+       xlab= 'Tiempo',
+       ylab='Valor de la acción',
+       names = meses)
+```
+
+
+```{r out.width="80%", fig.align="center", fig.cap= "Gráfico de líneas para estudiar periodicidad de la acción de CX", echo=FALSE, message=FALSE , warning=FALSE}
+
+ggseasonplot(ts_base,
+           polar=FALSE, 
+           main="Periodicidad del valor de la acción de CEMEX")+
+  labs(x="Meses",
+       y= "Valor de la acción",
+       caption = "Para el périodo del 01-01-2001 al 30-06-2020",
+       color = "Años")+
+  # geom_text(aes(label = year))+
+  scale_color_manual(values = rainbow(20))+
+  theme_bw()+
+  theme(legend.position = "bottom")
+
 ```
 
 
 3. Realice una gráfica de a serie de tiempo usando las metodologías vistas en clases (ggplot2,plot y xts)
 
-```{r out.width="60%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
+```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
 
 CX_base = data.frame(ts_base,time = seq(ISOdate(2001,01,01), 
                                      ISOdate(2020,06,30),
@@ -177,7 +209,7 @@ ESCRIBIR RESPUESTA
 
 - Suavización Holt, con $\alpha = 0.5 y \beta = 0.2, \beta = 0.8$ ¿Cuál es el papel de $\beta$ en la estimación de valores pronostico?
 
-```{r}
+```{r results='hide'}
 ts.holt_0502 = Holt(ts_base, alpha = 0.5, beta=0.2)
 ts.holt_0508 = Holt(ts_base, alpha = 0.5, beta=0.8)
 ```
@@ -194,7 +226,81 @@ hw.ts.2 = hw(ts_base, h=12, seasonal='additive')
 
 5. Cada inciso del punto anterior tiene dos o tres modelo del mismo tipo, así que una misma gráfica muestra los resultados junto con la serie original por modelo.
 
-HACER GRÁFICOS
+```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con el ajuste de Promedio móviles simples", echo=FALSE, message=FALSE , warning=FALSE}
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX \n Promedio móviles simples")
+lines(p.mov.2, col='#ff0054', lwd = 2)
+lines(p.mov.10, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción","PS orden 2","PS orden 10"))
+```
+
+
+```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con el ajuste de Promedio móviles ponderados", echo=FALSE, message=FALSE , warning=FALSE}
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX \n Promedio móviles ponderados")
+lines(p.mov.pond.4, col='#ff0054', lwd = 2)
+lines(p.mov.pond.12, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción","PPM orden 4","PPM orden 12"))
+```
+
+
+```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con el ajuste de Promedio móviles simples centrados", echo=FALSE, message=FALSE , warning=FALSE}
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX \n Promedio móviles simples centrados")
+lines(p.mov.2.c, col='#ff0054', lwd = 2)
+lines(p.mov.10.c, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción","PSC orden 2","PSC orden 10"))
+```
+
+
+```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con la suavización exponencial", echo=FALSE, message=FALSE , warning=FALSE}
+
+knitr::include_graphics(here("Rplot.png"))
+
+```
+
+
+```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con la suavización Holt", echo=FALSE, message=FALSE , warning=FALSE}
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = expression(paste("Serie de tiempo de la acción de CEMEX \n Suavización Holt con",alpha == 0.5)))
+lines(ts.holt_0502$estimate, col='#ff0054', lwd = 2)
+lines(ts.holt_0508$estimate, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción",expression(beta == 0.2),
+                expression(beta == 0.8)))
+```
+
+
+```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con la suavización Holt-Winters", echo=FALSE, message=FALSE , warning=FALSE}
+
+
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX \n Suavización Holt Winters")
+lines(hw.ts.1$fitted, col='#ff0054', lwd = 2)
+lines(hw.ts.2$fitted, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción",expression(paste(alpha == 0.5," ",beta == 0.2," ",gamma == 0.8)),"Automática"))
+
+```
+
 
 6. Seleccione el mejor modelo y mencione el por qué de su elección.
 
@@ -202,7 +308,12 @@ RESPONDER MODELO
 
 7. Utilizar la autocorrelación para determinar si hay patrones en los residuos de una serie de tiempo.
 
-HACER GRÁFICO ACF
+```{r echo = FALSE,out.width="80%", fig.cap= "Gráfico de Autocorrelación"}
+
+acf(ts_base,col = "#390099",xlab = "",ylab = "Autocorrelación",main = "Gráfico de Autocorrelación para la Serie \n del valor de la acción de CEMEX", lwd  =2)
+
+```
+
 
 8. Desea proyectar la información un año, ¿Cuál sería el mejor modelo para la proyección? realice la proyección y concluya si la proyección tiene sentido o no, detallando sus observaciones
 

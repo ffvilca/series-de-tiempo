@@ -83,13 +83,32 @@ ggplot(base, aes( x = CX.Adjusted, y = "")) +
   geom_boxplot(fill = "#390099", color = "black",outlier.colour= "#FFBD00" ,outlier.size=2) +
   labs(x="Valor de la acción de CEMEX",y= "",caption = "Para el périodo del 01-01-2001 al 30-06-2020")+
   ggtitle("Dispersón de la acción de CEMEX")+
-  coord_flip()
+  coord_flip()+
   theme_bw(base_size = 12)
 
 # P2
 
 summary(ts_base)
 
+boxplot(ts_base ~ cycle(ts_base),
+       col = "#390099", # Color de relleno
+       border = "#ff0054", #Color de contorno
+       main='Variación de la acción de CEMEX por mes',
+       xlab= 'Tiempo',
+       ylab='Valor de la acción',
+       names = month.abb # Agregar nombres puede ser month.abb o month.name o 
+       #cualquier vector personalizado
+)
+
+ggseasonplot(ts_base,
+           polar=FALSE, 
+           main="Periodicidad del valor de la acción de CEMEX")+
+  labs(x="Meses",
+       y= "Valor de la acción",
+       caption = "Para el périodo del 01-01-2001 al 30-06-2020",
+       color = "Años")+
+  scale_color_manual(values = rainbow(20))+
+  theme_bw()
 # P3
 
 plot(ts_base)
@@ -144,7 +163,6 @@ ts.base.sua_099
 
 # e
 
-library(aTSA)
 ts.holt_0502 = Holt(ts_base, alpha = 0.5, beta=0.2)
 ts.holt_0508 = Holt(ts_base, alpha = 0.5, beta=0.8)
 ts.holt_0502
@@ -152,11 +170,95 @@ ts.holt_0508
 
 # f
 
-ts_base_2 <- ts(ts_matrix,start=2001, frequency = 12)
-
-hw.ts.1 = hw(ts_base, h=12,optim.start = c(0.5,0.2,0.8))     # :c
+hw.ts.1 = hw(ts_base, h=12,optim.start = c(0.5,0.2,0.8))
 hw.ts.2 = hw(ts_base, h=12, seasonal='additive')
 
+# P5 
+
+# a
+
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX \n Promedio móviles simples")
+lines(p.mov.2, col='#ff0054', lwd = 2)
+lines(p.mov.10, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción","PS orden 2","PS orden 10"))  
 
 
+# b
 
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX \n Promedio móviles ponderados")
+lines(p.mov.pond.4, col='#ff0054', lwd = 2)
+lines(p.mov.pond.12, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción","PPM orden 4","PPM orden 12"))
+
+# c
+
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX \n Promedio móviles simples centrados")
+lines(p.mov.2.c, col='#ff0054', lwd = 2)
+lines(p.mov.10.c, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción","PSC orden 2","PSC orden 10"))
+
+
+# d
+
+par(mfrow = c(2,2))
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX")
+
+plot(ts.base.sua_001, type='l',col = "#ff0054", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = expression(paste("Serie de tiempo de la acción de CEMEX \n Suavización Exponencial Simple con",alpha == 0.01)))
+
+plot(ts.base.sua_05, type='l',col = "#ff5400", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = expression(paste("Serie de tiempo de la acción de CEMEX \n Suavización Exponencial Simple con",alpha == 0.5)))
+
+plot(ts.base.sua_099, type='l',col = "#ffbd00", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = expression(paste("Serie de tiempo de la acción de CEMEX \n Suavización Exponencial Simple con",alpha == 0.99)))
+
+# e
+
+par(mfrow = c(1,1))
+
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = expression(paste("Serie de tiempo de la acción de CEMEX \n Suavización Holt con",alpha == 0.5)))
+lines(ts.holt_0502$estimate, col='#ff0054', lwd = 2)
+lines(ts.holt_0508$estimate, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción",expression(beta == 0.2),
+                expression(beta == 0.8)))
+
+# f
+
+plot(ts_base, type='l',col = "#390099", lwd = 2,
+     xlab = 'Tiempo', ylab = 'Precio de la acción',
+     main = "Serie de tiempo de la acción de CEMEX \n Suavización Holt Winters")
+lines(hw.ts.1$fitted, col='#ff0054', lwd = 2)
+lines(hw.ts.2$fitted, col='#ffbd00', lwd = 2)
+legend("topright",
+       col=c("#390099","#FF0054","#FFBD00"),
+       lty=1,lwd=4,cex=0.8,
+       legend=c("Precio Acción",expression(paste(alpha == 0.5," ",beta == 0.2," ",gamma == 0.8)),"Automática"))
+
+# P6
+
+acf(ts_base,col = "#390099",xlab = "",ylab = "Autocorrelación",main = "Gráfico de Autocorrelación para la Serie \n del valor de la acción de CEMEX", lwd  =2)
