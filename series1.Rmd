@@ -1,30 +1,10 @@
 ---
-title: "Tarea 01"
-subtitle: "Modelos de Supervivencia y Series de Tiempo"
-format: 
-  pdf: 
-    include-in-header: 
-      text: |
-        \usepackage{amsmath}
-        \usepackage{float}
-    colorlinks: true
-    geometry:
-      - top=20mm
-      - left=20mm
-      - right=20mm
-      - heightrounded
-    fig-pos: "H"
-author:
-  - name: "Aaron Mauricio Gómez"
-  - name: "Carlos Brito Mejía"
-  - name: "Diego Luna"
-  - name: "Francisca Vilca Sánchez"
-crossref:
-  fig-title: Figura
-  fig-prefix: Figura
-  tbl-title: Tabla
-  tbl-prefix: Tabla
-tbl-cap-location: bottom
+title: "Untitled"
+author: "Gómez Jiménez Aaron Mauricio"
+date: "2023-04-06"
+output:
+  html_document: default
+  pdf_document: de
 ---
 
 ```{r setup, include=FALSE}
@@ -39,25 +19,28 @@ library(here)
 library(forecast)
 library(aTSA)
 library(seasonal)
-
+library(xts)
+library(plotrix)
+library(lmtest)
 ```
 
-  Usted invierte dinero en la compra de una acción. Para saber qué tan viable es su inversión, ha decidido hacer un análisis de serie de tiempo. Este tipo de análisis se utiliza para examinar los datos históricos y predecir futuros cambios en el valor de una inversión. Antes de invertir, es importante informarse y evaluar su disposición al riesgo y objetivos, así como hacer su perfil de inversionista. También es fundamental conocer los fundamentos de las inversiones y la rentabilidad esperada. Además, existen diversas metodologías que pueden ayudar a desarrollar estrategias efectivas para la inversión.
+ Usted invierte dinero en la compra de una acción. Para saber qué tan viable es su inversión, ha decidido hacer un análisis de serie de tiempo. Este tipo de análisis se utiliza para examinar los datos históricos y predecir futuros cambios en el valor de una inversión. Antes de invertir, es importante informarse y evaluar su disposición al riesgo y objetivos, así como hacer su perfil de inversionista. También es fundamental conocer los fundamentos de las inversiones y la rentabilidad esperada. Además, existen diversas metodologías que pueden ayudar a desarrollar estrategias efectivas para la inversión.
 
   Para su tarea busquen en Yahoo finanzas una acción que les llame su atención para su análisis. Yahoo finanzas es una de las principales páginas en la que usted podrá consultar información financiera, en ella además le permitirá ver gráficamente los datos y lo más importante descargar los datos en formato csv. Descargue los datos históricos del **1 de enero de 2001** al **30 Junio de 2020**, y en frecuencia indique periodicidad mensual, guarde estos datos en su carpeta de trabajo e impórtelos en R.
 
 Con base a dichos valores realice:
 
-1. Descargue e importe los datos en R y con ellos convierta el vector de precios a un objeto de series de tiempo y vea el comportamiento de sus datos, es decir calcule la media, moda, cuartiles, máximos, mínimos y varianza. Haga una gráfica de caja para ver visualmente estos resultados.
+**1.Descargue e importe los datos en R y con ellos convierta el vector de precios a un objeto de series de tiempo y vea el comportamiento de sus datos, es decir calcule la media, moda, cuartiles, máximos, mínimos y varianza. Haga una gráfica de caja para ver visualmente estos resultados.**
 
 Nuestro interés está en ver la posibilidad de invertir en las acciones de [*CEMEX*](https://www.cemexmexico.com/) una empresa ligada al ámbito de la construcción que se autodenomina ser líder en la venta y producción de Cemento y otros materiales. Para saber si es una buena opción hacer está inversión revisaremos los datos históricos desde el 1 de enero de 2001 al 30 de junio de 2020, usando algunos comandos y librerías de R extraeremos los datos desde [Yahoo! Finanzas](https://es-us.finanzas.yahoo.com/), tal como se muestra en el siguiente código:
 
-```{r results='hide', warning=FALSE}
+```{r results='hide'}
 
 getSymbols("CX", src = "yahoo", from = "2001-01-01", to = "2020-06-30",
            periodicity= "monthly")
 base <- CX[,6] # para solo usar la columna de los precios de cierre ajustados
 ts_base <- ts(base, start=2001, frequency = 12) # creamos el objeto de series de tiempo
+
 ```
 
 Una vez que tenemos la base y el objeto series de tiempo comenzamos a hacer un análisis del comportamiento de los datos obteniendo algunos datos interesantes, que se pueden ver resumidos en la Tabla 1:
@@ -84,7 +67,19 @@ footnote(a,general="* = Es el valor de la locación estimada de la moda")
 
 ```
 
-Como ya analizamos en valor promedio de la acción es de *9.703*, al graficar el mínimo observamos que se alcanza en marzo de 2020 con valor al cierre ajustado de *2.120*, que como se puede inferir se debió a la pandemia, ya que, al entrar en confinamiento la producción y venta de cemento se vio afectada, después de tocar su mínimo desde 2001, la acción se revalua y empieza a subir de precio, observamos que su mejor precio fue en mayo de 2007 con un valor de  27.697, despues tuvo fluctuaciones y pendientes negativas que coinciden con los años de la crisis de 2008, la gripe porcina 2009, la recesión de 2012, una caída en 2016, y después una caída alcanzando su mínimo hasta la pandemia de COVID-19.
+
+```{r out.width="80%", fig.align="center", fig.cap= "Media, minimo y maximo de la acción  CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
+plot(ts_base, xlab="Año", ylab="Precio de la Acción",
+     main="Serie de tiempo CEMEX")
+abline(a=media, b=0, col="blue")
+abline(a=minimo, b=0, col="red")
+abline(a=maximo, b=0, col="green")
+```
+
+
+Como ya analizamos en valor promedio de la acción es de *9.703*, al graficar el minimo observamos que se alcanza en marzo de 2020 con valor al cierre ajustado de *2.120*, que como se puede inferir se debio a la pandemia ya que al entrar en confinamiento la producción y venta de cemento se vio afectada, despues de tocar su minimo desde 2001, la acción se revalua y empieza a subir de precio, observamos que su mejor precio fue en mayo de 2007 con un valor de  27.697, despues tuvo fluctuaciones y pendientes negativas que coinciden con los años de la crisis de 2008, la gripe porcina 2009, la recesión de 2012, una caida en 2016, y despues una caida alcanzando su minimo hasta la pandemia de COVID-19.
+
+
 
 Además a través de un gráfico de caja se puede ver el resumen de estas medidas, tal como se muestra en la Figura 1:
 
@@ -100,9 +95,9 @@ grafico_1 <- ggplot(base, aes( x = CX.Adjusted, y = "")) +
 grafico_1
 ```
 
-Graficamente, podemos observar que existen muchos outliers, y hay 20 puntos de varianza con la media y el maximo, eso nos indica que esta muy lejos de el valor que llego a tener la acción.
+Graficamente podemos observar que existen muchos outliers, y hay 20 puntos de varianza con la media y el maximo, eso nos indica que esta muy lejos de el valor que llego a tener la acción.
 
-2. Haga un análisis de sus datos, determinar si hay tendencias crecientes, decrecientes y periodicidad.
+**2.Haga un análisis de sus datos, determinar si hay tendencias crecientes, decrecientes y periodicidad.**
 
 
 ```{r out.width="80%", fig.align="center", fig.cap= "Gráfico Financiero para la acción CX", echo=FALSE, message=FALSE , warning=FALSE}
@@ -132,6 +127,7 @@ plot(cemex.tendencia, col='steelblue',
 
 Como podemos observar no se ven tendencias a lo largo de los ultimos años, mas bien se ve que no existe tendencias mas allá de las crisis ya descritas, tampoco de observa periodicidad.
 
+
 ```{r out.width="80%", fig.align="center", fig.cap= "Boxplot para cada mes para la acción CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
 
 boxplot(ts_base ~ cycle(ts_base),
@@ -145,10 +141,11 @@ boxplot(ts_base ~ cycle(ts_base),
 
 En los boxplots mensuales podemos ver casi una recta constante cerca de la media del precio aunque con muchos outliers.
 
+
 ```{r out.width="80%", fig.align="center", fig.cap= "Gráfico de líneas para estudiar periodicidad de la acción de CX", echo=FALSE, message=FALSE , warning=FALSE}
 
 ggseasonplot(ts_base,
-           polar=FALSE, 
+           polar=F, 
            main="Periodicidad del valor de la acción de CEMEX")+
   labs(x="Meses",
        y= "Valor de la acción",
@@ -159,13 +156,29 @@ ggseasonplot(ts_base,
   theme_bw()+
   theme(legend.position = "bottom")
 
+
 ```
 
-Es más facil observar en esta gráfica que no existe estacionalidad ni periodicidad, ya que cada año la grafica cambia mucho en contraste con los otros años.
 
-3. Realice una gráfica de a serie de tiempo usando las metodologías vistas en clases (ggplot2,plot y xts)
+```{r}
+ggseasonplot(ts_base,
+           polar=T, 
+           main="Periodicidad del valor de la acción de CEMEX")+
+  labs(x="Meses",
+       y= "Valor de la acción",
+       caption = "Para el périodo del 01-01-2001 al 30-06-2020",
+       color = "Años")+
+  # geom_text(aes(label = year))+
+  scale_color_manual(values = rainbow(20))+
+  theme_bw()+
+  theme(legend.position = "bottom")
+```
 
-```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX", echo=FALSE, message=FALSE , warning=FALSE}
+Es mas facil observar en esta grafica que no existe estacionalidad ni periodicidad, ya que cada año la grafica cambia mucho en contraste con los otros años.
+
+**3.Realice una gráfica de la serie de tiempo usando las metodologías vistas en clases (ggplot2,plot y xts)**
+
+```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX con ggplot2", echo=FALSE, message=FALSE , warning=FALSE}
 
 CX_base = data.frame(ts_base,time = seq(ISOdate(2001,01,01), 
                                      ISOdate(2020,06,30),
@@ -201,17 +214,19 @@ plot(ts_base_xts, col = 'purple',
      main='Serie de Tiempo CEMEX')
 ```
 
-Esta opción nos agrega lineas verticales que nos hacen mas fácil la interpretación de los datos, ya que es más fácil ubicar la temporalidad de la serie.
+Esta opción nos agrega lineas verticales que nos hacen mas fácil la interpretación de los datos, ya que es mas fácil ubicar la temporalidad de la serie.
 
-4. Realiza las siguientes suavizaciones:
-- Suavización de promedios móviles simple (PS) de orden 2 y 10.
+
+**4.Realiza las siguientes suavizaciones:**
+**Suavización de promedios móviles simple (PS) de orden 2 y 10.**
 
 ```{r}
 p.mov.2 = ma(ts_base, order = 2)
 p.mov.10 = ma(ts_base, order = 10)
 ```
 
-- Suavización de promedios móviles ponderados (PPM) de orden 4 con los pesos ($0.5, 0.2, 0.2, 0.1$) para ($x_t, x_{t−1}, x_{t−2}, x_{t−3}$) y otra modelo (PPM) de orden 12 seleccionando ustedes mismos los pesos y mencionado el porque de esos pesos.
+
+**Suavización de promedios móviles ponderados (PPM) de orden 4 con los pesos ($0.5, 0.2, 0.2, 0.1$) para ($x_t, x_{t−1}, x_{t−2}, x_{t−3}$) y otro modelo (PPM) de orden 12 seleccionando ustedes mismos los pesos y mencionado el porque de esos pesos.**
 
 ```{r}
 pesos.b1 <- c(0.5,0.2,0.2,0.1)
@@ -227,16 +242,16 @@ p.mov.pond.12 <- stats::filter(ts_base, pesos.b2, sides=1)
 
 Para obtener nuestros pesos, al notar que estamos tomando en cuenta el año anterior, decidimos hacer el promedio historico de cada mes y así obtuvimos el valor de cada alfa para cada mes, de esta forma intentamos minimizar la varianza a corto plazo ya que nuestros alfas son pequeños.
 
-- Suavización de promedios móviles simples centrados (PSC) de orden 2 y 10.
+**Suavización de promedios móviles simples centrados (PSC) de orden 2 y 10.**
 
-```{r}
+```{r results='hide'}
 p.mov.2.c = ma(ts_base, order = 2, centre = TRUE)
 p.mov.10.c = ma(ts_base, order = 10, centre = TRUE)
 ```
 
-- Suavización exponencial simple con $\alpha = 0.01, \alpha = 0.5, \alpha = 0.99$, ¿Cuál es el papel de $\alpha$ en la estimación de valores pronostico?
+**Suavización exponencial simple con $\alpha = 0.01, \alpha = 0.5, \alpha = 0.99$, ¿Cuál es el papel de $\alpha$ en la estimación de valores pronostico?**
 
-```{r}
+```{r results='hide'}
 ts.base.sua_001 = ses(ts_base, alpha=0.01, initial = 'simple')
 ts.base.sua_05 = ses(ts_base, alpha=0.5, initial = 'simple')
 ts.base.sua_099 = ses(ts_base, alpha=0.99, initial = 'simple')
@@ -244,7 +259,7 @@ ts.base.sua_099 = ses(ts_base, alpha=0.99, initial = 'simple')
 
 Como vimos en clases el papel de las alphas es suavizar la varianza de nuestros pronosticos, en este caso por el ejemplo para $\alpha=0.01 nos indica que los valores mas recientes de nuestra serie de tiempo un peso de 0.01 es decir muy poco peso a los datos mas reciente en consecuencia se le da mas pesos a los datos mas viejos.
 
-- Suavización Holt, con $\alpha = 0.5$ y $\beta = 0.2, \beta = 0.8$ ¿Cuál es el papel de $\beta$ en la estimación de valores pronostico?
+**Suavización Holt, con $\alpha = 0.5 y  \beta = 0.2, \beta = 0.8$ ¿Cuál es el papel de $\beta$ en la estimación de valores pronostico?**
 
 ```{r results='hide'}
 ts.holt_0502 = Holt(ts_base, alpha = 0.5, beta=0.2)
@@ -253,16 +268,16 @@ ts.holt_0508 = Holt(ts_base, alpha = 0.5, beta=0.8)
 
 El papel de las betas es suavizar o exponenciar los cambios en las tendencias, una beta pequeña suaviza las tendencias recientes, es decir les da menor peso.
 
-- Suavización Holt-Winters, con $\alpha = 0.5 y \beta = 0.2, \gamma = 0.8$ y otro modelo Holt-Winterscon una selección automática de R.
+**Suavización Holt-Winters, con $\alpha = 0.5 y \beta = 0.2, \gamma = 0.8$ y otro modelo Holt-Winters con una selección automática de R.**
 
 ```{r}
-hw.ts.1 = hw(ts_base, h=12,optim.start = c(0.5,0.2,0.8))     # :c
+hw.ts.1 = hw(ts_base, h=12,optim.start = c(0.5,0.2,0.8))  
 hw.ts.2 = hw(ts_base, h=12, seasonal='additive')
 ```
 
 Notemos que en este  modelo el valor de gamma suaviza la estacionalidad.
 
-5. Cada inciso del punto anterior tiene dos o tres modelo del mismo tipo, así que una misma gráfica muestra los resultados junto con la serie original por modelo.
+**5.Cada inciso del punto anterior tiene dos o tres modelo del mismo tipo, así que una misma gráfica muestra los resultados junto con la serie original por modelo.**
 
 ```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con el ajuste de Promedio móviles simples", echo=FALSE, message=FALSE , warning=FALSE}
 plot(ts_base, type='l',col = "#390099", lwd = 2,
@@ -275,7 +290,6 @@ legend("topright",
        lty=1,lwd=4,cex=0.8,
        legend=c("Precio Acción","PS orden 2","PS orden 10"))
 ```
-
 
 ```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con el ajuste de Promedio móviles ponderados", echo=FALSE, message=FALSE , warning=FALSE}
 plot(ts_base, type='l',col = "#390099", lwd = 2,
@@ -305,8 +319,6 @@ legend("topright",
 
 ```{r out.width="80%", fig.align="center", fig.cap= "Serie de Tiempo de la acción de CEMEX junto con la suavización exponencial", echo=FALSE, message=FALSE , warning=FALSE}
 
-knitr::include_graphics(here("Rplot.png"))
-
 ```
 
 
@@ -316,7 +328,7 @@ plot(ts_base, type='l',col = "#390099", lwd = 2,
      main = expression(paste("Serie de tiempo de la acción de CEMEX \n Suavización Holt con",alpha == 0.5)))
 lines(ts.holt_0502$estimate, col='#ff0054', lwd = 2)
 lines(ts.holt_0508$estimate, col='#ffbd00', lwd = 2)
-legend("topright",
+legend("topright", 
        col=c("#390099","#FF0054","#FFBD00"),
        lty=1,lwd=4,cex=0.8,
        legend=c("Precio Acción",expression(beta == 0.2),
@@ -340,65 +352,25 @@ legend("topright",
 ```
 
 
-6. Seleccione el mejor modelo y mencione el por qué de su elección.
+**6.Seleccione el mejor modelo y mencione el por qué de su elección.**
 
+RESPONDER MODELO
 
-El mejor modelo es: el de la Suavización Holt con alpha = 0.5 y Beta = 0.2; veamos porque:
-
-¿Por qué elegir un modelo Holt? 
-Tanto teóricamente como dadas las visualizaciones de los modelos de series de tiempo considerados en la sección anterior, es inmediato concluir que necesitamos o un modelo Holt o un modelo Holt-Winters porque necesitamos un modelo que considere la tendencia. 
-
-Ahora ¿Por qué consideramos que es mas apropiada la suavización Holt que la suavización Holt-Winters? Porque en esta acción, en el inciso 2 detectamos que no hay una estacionalidad o periodicidad significativa. Esto es importante porque ambos modelos consideran la tendencia en la suavización, sin embargo el Holt-Winters toma en cuenta la estacionalidad, los patrones ciclicos, por lo que es más apropiado un modelo Holt ya que:
-
-- La suavización Holt es mas útil cuando la serie no tiene un patrón estacional o cuando es muy débil. 
-
-- Es mas simple y esto lo hace mas sencillo de interpretar, describir, presentar y trabajar.
-
-- Ya que el Holt-Winters estaría haciendo más complejo (quizás más de lo que sería suficiente) corremos el riesgo de estar "sobre-ajustando" la serie,
-
-Ya que decidimos optar por el modelo de Suavización Holt; ¿Por qué esos parámetros? Simplemente porque se ajustan mejor a la serie de tiempo. Observese que escoger una Beta tan "pequeña" significa que le estamos dando un menor peso a las tendencias recientes (Por el contrario el modelo con Beta = 0.8 les da mucho peso).
-
-7. Utilizar la autocorrelación para determinar si hay patrones en los residuos de una serie de tiempo.
+**7.Utilizar la autocorrelación para determinar si hay patrones en los residuos de una serie de tiempo.**
 
 ```{r echo = FALSE,out.width="80%", fig.cap= "Gráfico de Autocorrelación"}
 
 acf(ts_base,col = "#390099",xlab = "",ylab = "Autocorrelación",main = "Gráfico de Autocorrelación para la Serie \n del valor de la acción de CEMEX", lwd  =2)
 
 ```
+Es facil visualizar que existe correlación entre los datos. 
+**8.Desea proyectar la información un año, ¿Cuál sería el mejor modelo para la proyección? realice la proyección y concluya si la proyección tiene sentido o no, detallando sus observaciones.**
 
-Con el gráfico de autocorrelación se vuelve bastante sencillo ver que a medida que avanza el tiempo cada nuevo análisis depende menos del primero y más de su valor inmediatamente anterior.
 
-8. Desea proyectar la información un año, ¿Cuál sería el mejor modelo para la proyección? realice la proyección y concluya si la proyección tiene sentido o no, detallando sus observaciones
 
-```{r echo = FALSE,out.width="80%", fig.cap= "Gráfico de Proyección"}
-proyeccion <- forecast(hw.ts.1)
-plot(forecast(hw.ts.1))
-```
-
-Al observar la proyección, nos damos cuenta que tiene mucho sentido. Se aprecia natural y hasta intuitivo que lo que proyectamos sea una proyección muy verosimil.
-
-9. Demuestra que si una serie de tiempo es estacionaria en media y varianza, entonces su autocorrelación es
+**9.Demuestra que si una serie de tiempo es estacionaria en media y varianza, entonces su autocorrelación es**
 
 $$ \rho(h) = Corr(x_t, x_{t+h}) = \dfrac{E[x_t, x_{t+h}] − \mu}{\sigma^2}$$
-```{r out.width="100%", fig.align="center", fig.cap= "Solución Pregunta 9", echo=FALSE, message=FALSE , warning=FALSE}
-
-knitr::include_graphics(here("p9.jpg"))
-
-```
-
-
-10. Demuestra mediante inducción que en el suavizado exponencial esta expresión es válida
+**10.Demuestra mediante inducción que en el suavizado exponencial esta expresión es válida**
 
 $$ \hat{x}_{t+1} = ax_t + (1 − α)\hat{x}_t $$
-
-
-$$ \bar{X}_{t+1} = \alpha X_t + (1 - \alpha) \bar{X}_{t} $$
-
-```{r out.width="100%", fig.align="center", fig.cap= "Solución Pregunta 10", echo=FALSE, message=FALSE , warning=FALSE}
-
-knitr::include_graphics(here("p10.jpg"))
-knitr::include_graphics(here("p10.1.jpg"))
-
-```
-
-
